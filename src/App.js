@@ -1,23 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from 'react';
+import './App.scss';
 
 function App() {
+  const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  function getData() {
+    fetch("http://universities.hipolabs.com/search")
+      .then((response) => response.json())
+      .then((data) => setData(data.reduce((acc, value) => [...acc.concat(value)], [])));
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <form class="search-form">
+          <input 
+            type="text" 
+            className="search" 
+            placeholder="Find a university"
+            value={search}
+            onChange={(text) => setSearch(text.target.value)} />
+            {search == "" ? ( <li className="no-search">Filter for a university</li> ) : 
+            (
+              <ul className="suggestions">
+                {data.filter((item) => item.name.includes(search) || item.country.includes(search)).map((item, key) => (<li key = {key}> {item.name} {item.country}</li>)) }
+              </ul>
+            )}
+        </form>
     </div>
   );
 }
